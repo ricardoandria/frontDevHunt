@@ -31,7 +31,7 @@ export default function Customers() {
   const handleClose = () => setOpen(false);
 
   const [openUpdate, setOpenUpdate] = React.useState(false);
-  const handleOpenUpd = () => setOpenUpdate(true);
+
   const handleCloseUpd = () => setOpenUpdate(false);
 
   const [nom, setNom] = useState("");
@@ -48,8 +48,11 @@ export default function Customers() {
 
   const { loading, data, refetch } = useCreateClient();
 
-  const deleteClient = (id) => {
-    axios.delete(`http://localhost:7072/API/Banking/client/${id}`);
+  const [clientUpdate, setClientUpdate] = useState();
+
+  const deleteClient = async (id) => {
+    await axios.delete(`http://localhost:7072/API/Banking/client/${id}`);
+    refetch();
   };
 
   const addNewClient = async (e) => {
@@ -79,20 +82,42 @@ export default function Customers() {
     } else setFilteredData(newfilter);
   };
 
-  const editClient = (e, id) => {
-    const urlApi = "http://localhost:7072/API/Banking/client/";
-    e.preventDefault();
-    var data = {
-      nom: nom,
-      prenom: prenom,
-      adress: adress,
-      numero_phone: numero_phone,
-      num_compte: num_compte,
-      solde: solde,
-    };
-    axios.put(urlApi / `${id}`);
-    console.log(id);
+  const handleOpenUpd = async (id) => {
+    setOpenUpdate(true);
+
+    await axios
+      .get(`http://localhost:7072/API/Banking/client/${id}`)
+      .then((resp) => setClientUpdate(resp.data))
+      .catch((err) => console.log(err));
   };
+
+  const updateClient = async (id) => {
+    await axios
+      .put(`http://localhost:7072/API/Banking/client/${id}`, {
+        nom,
+        prenom,
+        adress,
+        num_compte,
+        numero_phone,
+        solde,
+      })
+      .then((resp) => console.log(resp.data));
+  };
+
+  // const editClient = (e, id) => {
+  //   const urlApi = "http://localhost:7072/API/Banking/client/";
+  //   e.preventDefault();
+  //   var data = {
+  //     nom: nom,
+  //     prenom: prenom,
+  //     adress: adress,
+  //     numero_phone: numero_phone,
+  //     num_compte: num_compte,
+  //     solde: solde,
+  //   };
+  //   axios.put(urlApi / `${id}`);
+  //   console.log(id);
+  // };
 
   return (
     <>
@@ -251,114 +276,117 @@ export default function Customers() {
                       <th>Action</th>
                     </tr>
                   </thead>
-                  <Modal
-                    open={openUpdate}
-                    onClose={handleCloseUpd}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                  >
-                    <Box
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "20px",
-                      }}
-                      sx={style}
-                      component="form"
-                      noValidate
-                      autoComplete="off"
+                  {clientUpdate?.data.map((item, index) => (
+                    <Modal
+                      open={openUpdate}
+                      onClose={handleCloseUpd}
+                      aria-labelledby="modal-modal-title"
+                      aria-describedby="modal-modal-description"
                     >
-                      <div
+                      <Box
                         style={{
                           display: "flex",
-                          justifyContent: "space-between",
-                          gap: "5px",
+                          flexDirection: "column",
+                          gap: "20px",
                         }}
+                        sx={style}
+                        component="form"
+                        noValidate
+                        autoComplete="off"
                       >
-                        <TextField
-                          id="outlined-textarea"
-                          label="Nom"
-                          placeholder="Nom"
-                          name="nom"
-                          multiline
-                          style={{ width: "50%" }}
-                          onChange={(e) => setNom(e.target.value)}
-                          value={nom}
-                        />
-                        <TextField
-                          id="outlined-textarea"
-                          label="Prenoms"
-                          placeholder="Prenom"
-                          name="prenom"
-                          multiline
-                          style={{ width: "50%" }}
-                          onChange={(e) => setPrenom(e.target.value)}
-                          value={prenom}
-                        />
-                      </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "5px",
+                          }}
+                        >
+                          <TextField
+                            id="outlined-textarea"
+                            label="Nom"
+                            placeholder="Nom"
+                            name="nom"
+                            multiline
+                            style={{ width: "50%" }}
+                            onChange={(e) => setNom(e.target.value)}
+                            value={nom}
+                          />
+                          <TextField
+                            id="outlined-textarea"
+                            label="Prenoms"
+                            placeholder="Prenom"
+                            name="prenom"
+                            multiline
+                            style={{ width: "50%" }}
+                            onChange={(e) => setPrenom(e.target.value)}
+                            value={prenom}
+                          />
+                        </div>
 
-                      <TextField
-                        id="outlined-textarea"
-                        label="Address"
-                        placeholder="Address"
-                        name="adress"
-                        multiline
-                        onChange={(e) => setAdress(e.target.value)}
-                        value={adress}
-                      />
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: "5px",
-                        }}
-                        className="numPhone_Compte"
-                      >
                         <TextField
                           id="outlined-textarea"
-                          label="Numero Telephone"
-                          placeholder="Numero Telephone"
-                          name="numero_phone"
+                          label="Address"
+                          placeholder="Address"
+                          name="adress"
                           multiline
-                          style={{ width: "50%" }}
-                          onChange={(e) => setNumPhone(e.target.value)}
-                          value={numero_phone}
+                          onChange={(e) => setAdress(e.target.value)}
+                          value={adress}
                         />
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "5px",
+                          }}
+                          className="numPhone_Compte"
+                        >
+                          <TextField
+                            id="outlined-textarea"
+                            label="Numero Telephone"
+                            placeholder="Numero Telephone"
+                            name="numero_phone"
+                            multiline
+                            style={{ width: "50%" }}
+                            onChange={(e) => setNumPhone(e.target.value)}
+                            value={numero_phone}
+                          />
+                          <TextField
+                            id="outlined-textarea"
+                            label="Numero Compte"
+                            placeholder="Numero Compte"
+                            multiline
+                            name="num_compte"
+                            style={{ width: "50%" }}
+                            onChange={(e) => setNumCompte(e.target.value)}
+                            value={num_compte}
+                          />
+                        </div>
                         <TextField
                           id="outlined-textarea"
-                          label="Numero Compte"
-                          placeholder="Numero Compte"
+                          label="Debut de Solde"
+                          placeholder="Debut de solde"
+                          name="solde"
+                          onChange={(e) => setSolde(e.target.value)}
                           multiline
-                          name="num_compte"
-                          style={{ width: "50%" }}
-                          onChange={(e) => setNumCompte(e.target.value)}
-                          value={num_compte}
+                          value={solde}
                         />
-                      </div>
-                      <TextField
-                        id="outlined-textarea"
-                        label="Debut de Solde"
-                        placeholder="Debut de solde"
-                        name="solde"
-                        onChange={(e) => setSolde(e.target.value)}
-                        multiline
-                        value={solde}
-                      />
-                      <button
-                        style={{
-                          width: " 50%",
-                          marginLeft: "50%",
-                          padding: "10px 20px",
-                          background: "rgb(37, 150, 190)",
-                          color: "white",
-                          fontWeight: "600",
-                        }}
-                        onClick={addNewClient}
-                      >
-                        Modifier
-                      </button>
-                    </Box>
-                  </Modal>
+                        <button
+                          style={{
+                            width: " 50%",
+                            marginLeft: "50%",
+                            padding: "10px 20px",
+                            background: "rgb(37, 150, 190)",
+                            color: "white",
+                            fontWeight: "600",
+                          }}
+                          onClick={() => updateClient(item.id_client)}
+                        >
+                          Modifier
+                        </button>
+                      </Box>
+                    </Modal>
+                  ))}
+
                   <tbody>
                     {filteredData.length == 0
                       ? data?.data.data.map((item, i) => {
@@ -384,7 +412,7 @@ export default function Customers() {
                                   }}
                                 >
                                   <button
-                                    onClick={deleteClient(item.id_client)}
+                                    onClick={() => deleteClient(item.id_client)}
                                     style={{
                                       padding: "5px 10px",
                                       background: "red",
@@ -395,7 +423,9 @@ export default function Customers() {
                                     Delete
                                   </button>
                                   <button
-                                    onClick={handleOpenUpd}
+                                    onClick={() =>
+                                      handleOpenUpd(item.id_client)
+                                    }
                                     style={{
                                       padding: "5px 10px",
                                       background: "rgb(37, 150, 190)",

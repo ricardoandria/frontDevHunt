@@ -195,7 +195,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {client.map((item, i) => {
+                  {client?.map((item, i) => {
                     return (
                       <tr>
                         <td>{item.prenom}</td>

@@ -9,7 +9,7 @@ const FetchRetrait = () => {
 };
 
 export const useCreateRetrait = () => {
-  return useQuery("versement", FetchRetrait, {});
+  return useQuery("retrait", FetchRetrait, {});
 };
 
 export const useAddRetrait = () => {

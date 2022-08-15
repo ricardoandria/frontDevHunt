@@ -30,6 +30,12 @@ const Versement = () => {
   const [montant_versement, setMontantVersement] = useState("");
   const [date_versement, setDateVersement] = useState("");
 
+  const [clientUpdate, setClientUpdate] = useState();
+
+  const [openUpdate, setOpenUpdate] = React.useState(false);
+
+  const handleCloseUpd = () => setOpenUpdate(false);
+
   const { loading, data, refetch } = useCreateVersement();
 
   const addNewVersement = async (e) => {
@@ -46,6 +52,11 @@ const Versement = () => {
     refetch();
   };
 
+  const deleteClient = async (id) => {
+    await axios.delete(`http://localhost:7072/API/Banking/versement/${id}`);
+    refetch();
+  };
+
   const handlefilter = (event) => {
     const searchUser = event.target.value;
     const newfilter = data.data.data.filter((value) => {
@@ -55,6 +66,26 @@ const Versement = () => {
     if (searchUser == "") {
       setFilteredData(data.data.data);
     } else setFilteredData(newfilter);
+  };
+
+  const handleOpenUpd = async (id) => {
+    setOpenUpdate(true);
+
+    await axios
+      .get(`http://localhost:7072/API/Banking/versement/${id}`)
+      .then((resp) => setClientUpdate(resp.data))
+      .catch((err) => console.log(err));
+  };
+
+  const updateVersement = async (id) => {
+    await axios
+      .put(`http://localhost:7072/API/Banking/versement/${id}`, {
+        id_client,
+        num_compte,
+        montant_versement,
+        date_versement,
+      })
+      .then((resp) => console.log(resp.data));
   };
 
   return (
@@ -184,8 +215,91 @@ const Versement = () => {
                     <th>Numero de compte</th>
                     <th>Montant</th>
                     <th>Date </th>
+                    <th>Action</th>
                   </tr>
                 </thead>
+                {clientUpdate?.data.map((item, index) => (
+                  <Modal
+                    open={openUpdate}
+                    onClose={handleCloseUpd}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <Box
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "20px",
+                      }}
+                      sx={style}
+                      component="form"
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "5px",
+                        }}
+                      >
+                        <TextField
+                          id="outlined-textarea"
+                          label="Numero Compte"
+                          placeholder="Numero Compte"
+                          name="num_compte"
+                          multiline
+                          style={{ width: "50%" }}
+                          onChange={(e) => setNumCompte(e.target.value)}
+                          value={num_compte}
+                        />
+                        <TextField
+                          id="outlined-textarea"
+                          label="Montant versement"
+                          placeholder="Montant Versement"
+                          name="montant_versement"
+                          multiline
+                          style={{ width: "50%" }}
+                          onChange={(e) => setMontantVersement(e.target.value)}
+                          value={montant_versement}
+                        />
+                      </div>
+
+                      <TextField
+                        id="outlined-textarea"
+                        label="Numero client"
+                        placeholder="Numero Client"
+                        name="id_client"
+                        multiline
+                        onChange={(e) => setIdClient(e.target.value)}
+                        value={id_client}
+                      />
+
+                      <TextField
+                        id="outlined-textarea"
+                        label="Date de versement"
+                        placeholder="date de versement"
+                        name="date_versement"
+                        onChange={(e) => setDateVersement(e.target.value)}
+                        multiline
+                        value={date_versement}
+                      />
+                      <button
+                        style={{
+                          width: " 50%",
+                          marginLeft: "50%",
+                          padding: "10px 20px",
+                          background: "rgb(37, 150, 190)",
+                          color: "white",
+                          fontWeight: "600",
+                        }}
+                        onClick={() => updateVersement(item.id_versement)}
+                      >
+                        Modifier
+                      </button>
+                    </Box>
+                  </Modal>
+                ))}
                 <tbody>
                   {filteredData.length == 0
                     ? data?.data.data.map((item, i) => {
@@ -202,6 +316,36 @@ const Versement = () => {
                             </td>
                             <td>{item.montant_versement} Ar</td>
                             <td>{item.date_versement}</td>
+                            <td
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                              }}
+                            >
+                              <button
+                                onClick={() => deleteClient(item.id_versement)}
+                                style={{
+                                  padding: "5px 10px",
+                                  background: "red",
+                                  color: "white",
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Delete
+                              </button>
+                              <button
+                                onClick={() => handleOpenUpd(item.id_versement)}
+                                style={{
+                                  padding: "5px 10px",
+                                  background: "rgb(37, 150, 190)",
+                                  color: "white",
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Modifier
+                              </button>
+                            </td>
                           </tr>
                         );
                       })
